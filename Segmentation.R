@@ -87,8 +87,9 @@ range(san_train$BALANCE_FREQUENCY)#0-1
 range(san_train$PURCHASES_FREQUENCY)#0-1
 range(san_train$ONEOFF_PURCHASES_FREQUENCY)#0-1
 range(san_train$PURCHASES_INSTALLMENTS_FREQUENCY)#0-1
-range(san_train$CASH_ADVANCE_FREQUENCY)
+range(san_train$CASH_ADVANCE_FREQUENCY)#0-1.5
 
+#since CASH_ADVNACE_FREQUENCY is higher than 1 we will remove values which are greater than 1
 san_train$CASH_ADVANCE_FREQUENCY[san_train$CASH_ADVANCE_FREQUENCY>1]
 san_train = na.omit(san_train)
 dim(san_train)
@@ -133,47 +134,48 @@ summary(san_train)
 #Creating New Variables & Advanced Data Preparation
 #monthly average purchase
 san_train$Monthly_Avg_expns <- san_train$PURCHASES/(san_train$PURCHASES_FREQUENCY*san_train$TENURE)
-san_train$Monthly_Avg_expns[is.nan(san_train$Monthly_Avg_expns)] <- 0
+san_train$Monthly_Avg_expns[is.nan(san_train$Monthly_Avg_expns)] <- 0 #removing values that are NAN
 san_train$Monthly_Avg_expns[san_train$Monthly_Avg_expns==Inf] <- 0
 
 #monthly cash advance amount
 san_train$Monthly_CASH_ADVANCE <- san_train$CASH_ADVANCE/(san_train$CASH_ADVANCE_FREQUENCY*san_train$TENURE)
-san_train$Monthly_CASH_ADVANCE[is.nan(san_train$Monthly_CASH_ADVANCE)] <- 0
-san_train$Monthly_CASH_ADVANCE[san_train$Monthly_CASH_ADVANCE==Inf] <- 0
+san_train$Monthly_CASH_ADVANCE[is.nan(san_train$Monthly_CASH_ADVANCE)] <- 0 #removing values that are NAN
+san_train$Monthly_CASH_ADVANCE[san_train$Monthly_CASH_ADVANCE==Inf] <- 0 #removing values that are infinity
 
 
 #purchases by type
 san_train$Monthly_INSTALLMENTS_PURCHASES  <- san_train$INSTALLMENTS_PURCHASES/(san_train$PURCHASES_INSTALLMENTS_FREQUENCY*san_train$TENURE)
-san_train$Monthly_INSTALLMENTS_PURCHASES[is.nan(san_train$Monthly_INSTALLMENTS_PURCHASES)] <- 0
-san_train$Monthly_INSTALLMENTS_PURCHASES[san_train$Monthly_INSTALLMENTS_PURCHASES==Inf] <- 0
+san_train$Monthly_INSTALLMENTS_PURCHASES[is.nan(san_train$Monthly_INSTALLMENTS_PURCHASES)] <- 0 #removing values that are NAN
+san_train$Monthly_INSTALLMENTS_PURCHASES[san_train$Monthly_INSTALLMENTS_PURCHASES==Inf] <- 0 #removing values that are infinity
 
 san_train$Monthly_ONEOFF_PURCHASES  <- san_train$ONEOFF_PURCHASES/(san_train$ONEOFF_PURCHASES_FREQUENCY*san_train$TENURE)
-san_train$Monthly_ONEOFF_PURCHASES[is.nan(san_train$Monthly_ONEOFF_PURCHASES)] <- 0
-san_train$Monthly_ONEOFF_PURCHASES[san_train$Monthly_ONEOFF_PURCHASES==Inf] <- 0
+san_train$Monthly_ONEOFF_PURCHASES[is.nan(san_train$Monthly_ONEOFF_PURCHASES)] <- 0 #removing values that are NAN
+san_train$Monthly_ONEOFF_PURCHASES[san_train$Monthly_ONEOFF_PURCHASES==Inf] <- 0 #removing values that are infinity
 
 #average amount per purchase
 san_train$AVG_AMT_PRC=san_train$PURCHASES/san_train$PURCHASES_TRX
-san_train$AVG_AMT_PRC[is.nan(san_train$AVG_AMT_PRC)] <- 0
-san_train$AVG_AMT_PRC[san_train$AVG_AMT_PRC==Inf] <- 0
+san_train$AVG_AMT_PRC[is.nan(san_train$AVG_AMT_PRC)] <- 0 #removing values that are NAN
+san_train$AVG_AMT_PRC[san_train$AVG_AMT_PRC==Inf] <- 0 #removing values that are infinity
 
 #limit usage(balance to credit limit ratio)
 san_train$LIMIT_USAGE=san_train$BALANCE/san_train$CREDIT_LIMIT
-san_train$LIMIT_USAGE[is.nan(san_train$LIMIT_USAGE)] <- 0
-san_train$LIMIT_USAGE[san_train$LIMIT_USAGE==Inf] <- 0
+san_train$LIMIT_USAGE[is.nan(san_train$LIMIT_USAGE)] <- 0 #removing values that are NAN
+san_train$LIMIT_USAGE[san_train$LIMIT_USAGE==Inf] <- 0 #removing values that are infinity
 
 #payments to minimum payments ratio
 san_train$PAY_MIN_PAY=san_train$PAYMENTS/san_train$MINIMUM_PAYMENTS
-san_train$PAY_MIN_PAY[is.nan(san_train$PAY_MIN_PAY)] <- 0
-san_train$PAY_MIN_PAY[san_train$PAY_MIN_PAY==Inf] <- 0
+san_train$PAY_MIN_PAY[is.nan(san_train$PAY_MIN_PAY)] <- 0 #removing values that are NAN
+san_train$PAY_MIN_PAY[san_train$PAY_MIN_PAY==Inf] <- 0 #removing values that are infinity
 
 
-#---------------------------------------------Feature selection--------------------------------
+#---------------------------------------------Feature selection------------------------------------
 corrm <- cor(san_train)
 corrgram(san_train, order = F,
          upper.panel=panel.pie, text.panel=panel.txt, main = "Correlation Plot")
 
 
-#--------------------------------------------standardizing the data----------------------------------
+#--------------------------------------------standardizing the data--------------------------------
+#since we are going to apply Kmeans which is distance based algorithm we need to standardize our data
 inputdata_final=scale(san_train)
 head(inputdata_final)
 #--------------------------------------------Kmeans------------------------------------------------
